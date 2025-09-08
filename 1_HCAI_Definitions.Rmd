@@ -1,0 +1,611 @@
+---
+title: "1_HCAI_Definitions"
+output: html_document
+author: Marinelle Villanueva
+date: '2025-08-31'
+purpose: This code defines  diagnostic codes for main and sub-classifications of diagnoses from primary and external causes (dx1ext) and primary, secondary, and external causes (dx12ext). HCAI ICD-9 and ICD-10 to diagnostic codes are defined for emergency department visits in California between 2008 and 2018. ICD-9 codes are used up to 2015-09-30 and ICD-10 codes are used for 2015-10-01 and thereafter. 
+ICD-9 & 10 Diagnostic Codes: https://data.chhs.ca.gov/dataset/hospital-emergency-department-diagnosis-procedure-and-external-cause-codes
+---
+
+load libraries and set working directories
+```{r setup, include=FALSE}
+library(data.table)
+library(dplyr)
+
+# define directories 
+dir1 <- "path/to/project"            # working directory for project
+dir2 <- "path/to/raw/HCAI/"          # working directory for raw HCAI ED visit data
+dir3 <- "path/to/HCAI_Definitions"   # working directory for HCAI Definitions outputs
+
+# ensure directories exist
+for (d in list(dir1, dir2, dir3)) {
+  if (!dir.exists(d)) dir.create(d, recursive = TRUE)
+}
+```
+
+For Primary Dx and Primary and Secondary Dx Groupings
+```{r HCAI 2008, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2008ALL <- fread(file.path(dir2, "dm_ED2008.csv")) %>% as.data.frame() 
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-9 condition groupings
+data_list_icd9 <- list(ED2008ALL = ED2008ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd9)) {
+  setDT(data_list_icd9[[dt_name]])
+  dt <- data_list_icd9[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions09, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions09, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions09_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions09_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2008ALL, file = file.path(dir3, "ICD9_2008_ED.csv")) 
+
+# clean up memory
+rm(ED2008ALL, data_list_icd9)
+gc()
+```
+
+```{r HCAI 2009, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2009ALL <- fread(file.path(dir2, "dm_ED2009.csv")) %>% as.data.frame() 
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-9 condition groupings
+data_list_icd9 <- list(ED2009ALL = ED2009ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd9)) {
+  setDT(data_list_icd9[[dt_name]])
+  dt <- data_list_icd9[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions09, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions09, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions09_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions09_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2009ALL, file = file.path(dir3, "ICD9_2009_ED.csv")) 
+
+# clean up memory
+rm(ED2009ALL, data_list_icd9)
+gc()
+```
+
+```{r HCAI 2010, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2010ALL <- fread(file.path(dir2, "dm_ED2010.csv")) %>% as.data.frame() 
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-9 condition groupings
+data_list_icd9 <- list(ED2010ALL = ED2010ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd9)) {
+  setDT(data_list_icd9[[dt_name]])
+  dt <- data_list_icd9[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions09, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions09, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions09_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions09_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2010ALL, file = file.path(dir3, "ICD9_2010_ED.csv")) 
+
+# clean up memory
+rm(ED2010ALL, data_list_icd9)
+gc()
+```
+
+```{r HCAI 2011, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2011ALL <- fread(file.path(dir2, "dm_ED2011.csv")) %>% as.data.frame() 
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-9 condition groupings
+data_list_icd9 <- list(ED2011ALL = ED2011ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd9)) {
+  setDT(data_list_icd9[[dt_name]])
+  dt <- data_list_icd9[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions09, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions09, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions09_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions09_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2011ALL, file = file.path(dir3, "ICD9_2011_ED.csv")) 
+
+# clean up memory
+rm(ED2011ALL, data_list_icd9)
+gc()
+```
+
+```{r HCAI 2012, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2012ALL <- fread(file.path(dir2, "dm_ED2012.csv")) %>% as.data.frame() 
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-9 condition groupings
+data_list_icd9 <- list(ED2012ALL = ED2012ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd9)) {
+  setDT(data_list_icd9[[dt_name]])
+  dt <- data_list_icd9[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions09, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions09, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions09_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions09_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2012ALL, file = file.path(dir3, "ICD9_2012_ED.csv")) 
+
+# clean up memory
+rm(ED2012ALL, data_list_icd9)
+gc()
+```
+
+```{r HCAI 2013, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2013ALL <- fread(file.path(dir2, "dm_ED2013.csv")) %>% as.data.frame() 
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-9 condition groupings
+data_list_icd9 <- list(ED2013ALL = ED2013ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd9)) {
+  setDT(data_list_icd9[[dt_name]])
+  dt <- data_list_icd9[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions09, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions09, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions09_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions09_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2013ALL, file = file.path(dir3, "ICD9_2013_ED.csv")) 
+
+# clean up memory
+rm(ED2013ALL, data_list_icd9)
+gc()
+```
+
+```{r HCAI 2014, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2014ALL <- fread(file.path(dir2, "dm_ED2014.csv")) %>% as.data.frame() 
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-9 condition groupings
+data_list_icd9 <- list(ED2014ALL = ED2014ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd9)) {
+  setDT(data_list_icd9[[dt_name]])
+  dt <- data_list_icd9[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions09, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions09, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions09_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions09_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2014ALL, file = file.path(dir3, "ICD9_2014_ED.csv")) 
+
+# clean up memory
+rm(ED2014ALL, data_list_icd9)
+gc()
+```
+
+```{r HCAI 2015v1, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2015v1ALL <- fread(file.path(dir2, "dm_ED2015.csv")) %>%
+  as.data.frame() %>%
+  mutate(date = as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))) %>%
+  filter(date >= as.POSIXct("2015-01-01", tz = "GMT") & date <= as.POSIXct("2015-09-30", tz = "GMT")) %>%
+  select(c(8:32, 7, 1:6, 33:35))  # Reorder columns as needed
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-9 condition groupings
+data_list_icd9 <- list(ED2015v1ALL = ED2015v1ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd9)) {
+  setDT(data_list_icd9[[dt_name]])
+  dt <- data_list_icd9[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions09, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions09, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions09_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions09_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2015v1ALL, file = file.path(dir3, "ICD9_2015v1_ED.csv")) 
+
+# clean up memory
+rm(ED2015v1ALL, data_list_icd9)
+gc()
+```
+
+```{r HCAI 2015v2, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2015v2ALL <- fread(file.path(dir2, "dm_ED2015.csv")) %>%
+  as.data.frame() %>%
+  mutate(date = as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))) %>%
+  filter(date >= as.POSIXct("2015-10-01", tz = "GMT") & date <= as.POSIXct("2015-12-31", tz = "GMT")) %>%
+  select(c(8:32, 7, 1:6, 33:35))  # Reorder columns as needed
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-10 condition groupings
+data_list_icd10 <- list(ED2015v2ALL = ED2015v2ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd10)) {
+  setDT(data_list_icd10[[dt_name]])
+  dt <- data_list_icd10[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions10, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions10, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions10_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions10_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2015v2ALL, file = file.path(dir3, "ICD10_2015v2_ED.csv")) 
+
+# clean up memory
+rm(ED2015v2ALL, data_list_icd10)
+gc()
+```
+
+```{r HCAI 2016, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2016ALL <- fread(file.path(dir2, "dm_ED2015.csv")) %>%
+  as.data.frame() %>%
+  mutate(date = as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))) %>%
+  filter(date >= as.POSIXct("2015-10-01", tz = "GMT") & date <= as.POSIXct("2015-12-31", tz = "GMT")) %>%
+  select(c(8:32, 7, 1:6, 33:35))  # Reorder columns as needed
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-10 condition groupings
+data_list_icd10 <- list(ED2016ALL = ED2016ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd10)) {
+  setDT(data_list_icd10[[dt_name]])
+  dt <- data_list_icd10[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions10, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions10, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions10_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions10_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2016ALL, file = file.path(dir3, "ICD10_2016_ED.csv")) 
+
+# clean up memory
+rm(ED2016ALL, data_list_icd10)
+gc()
+```
+
+```{r HCAI 2017, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2017ALL <- fread(file.path(dir2, "dm_ED2015.csv")) %>%
+  as.data.frame() %>%
+  mutate(date = as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))) %>%
+  filter(date >= as.POSIXct("2015-10-01", tz = "GMT") & date <= as.POSIXct("2015-12-31", tz = "GMT")) %>%
+  select(c(8:32, 7, 1:6, 33:35))  # Reorder columns as needed
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-10 condition groupings
+data_list_icd10 <- list(ED2017ALL = ED2017ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd10)) {
+  setDT(data_list_icd10[[dt_name]])
+  dt <- data_list_icd10[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions10, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions10, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions10_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions10_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2017ALL, file = file.path(dir3, "ICD10_2017_ED.csv")) 
+
+# clean up memory
+rm(ED2017ALL, data_list_icd10)
+gc()
+```
+
+```{r HCAI 2018, include=FALSE}
+# load diagnostic definitions
+source(file.path(dir1,"HCAI_ICD_Definitions.R"))
+
+# load ED dataset 
+ED2018ALL <- fread(file.path(dir2, "dm_ED2015.csv")) %>%
+  as.data.frame() %>%
+  mutate(date = as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))) %>%
+  filter(date >= as.POSIXct("2015-10-01", tz = "GMT") & date <= as.POSIXct("2015-12-31", tz = "GMT")) %>%
+  select(c(8:32, 7, 1:6, 33:35))  # Reorder columns as needed
+
+# function to apply condition functions across diagnosis columns
+apply_conditions <- function(dt, condition_functions, diagnosis_cols, prefix) {
+  # Loop through all conditions and apply them to relevant columns
+  for (condition in names(condition_functions)) {
+    new_col_name <- paste0(prefix, condition)
+    dt[, (new_col_name) := 0]  # Initialize the column to 0
+    
+    # Apply conditions across relevant columns
+    dt[, (new_col_name) := 
+          as.numeric(Reduce('|', lapply(diagnosis_cols, function(col) {
+            condition_functions[[condition]](dt[[col]])
+          }))) ]
+  }
+  return(dt)
+}
+
+# Apply ICD-10 condition groupings
+data_list_icd10 <- list(ED2018ALL = ED2018ALL)
+
+# Apply main category ICD-9 HHO Codes (dx1ext) in Principal Diagnosis and External Diagnosis (columns 1 and 26)
+for (dt_name in names(data_list_icd10)) {
+  setDT(data_list_icd10[[dt_name]])
+  dt <- data_list_icd10[[dt_name]]
+  
+  dt <- apply_conditions(dt, condition_functions10, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt, condition_functions10, c(1, 2, 26), "dx12ext_")
+  dt <- apply_conditions(dt, condition_functions10_subs, c(1, 26), "dx1ext_")
+  dt <- apply_conditions(dt,condition_functions10_subs, c(1, 2, 26), "dx12ext_")
+  
+  assign(dt_name, dt, envir = .GlobalEnv)
+}
+
+# save processed data
+fwrite(ED2018ALL, file = file.path(dir3, "ICD10_2018_ED.csv")) 
+
+# clean up memory
+rm(ED2018ALL, data_list_icd10)
+gc()
+```
+
+
