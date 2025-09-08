@@ -1,0 +1,508 @@
+---
+title: "2_HCAI_Groupings"
+output: html_document
+author: Marinelle Villanueva
+date: '2025-08-31'
+purpose: This code groups emergency department diagnoses into heat-related outcomes. Diagnoses are grouped into a limited (D2Dx1) group and broad (D5Dx1) group of outcomes that have been associated with heat in prior literature. The temporal period spans the warm season in California (May to September) between 2008 and 2018. 
+reference: Basu R, Pearson D, Malig B, Broadwin R, Green R. The effect of high ambient temperature on emergency room visits. Epidemiology. 2012 Nov;23(6):813-20. doi: 10.1097/EDE.0b013e31826b7f97. PMID: 23007039.
+---
+
+```{r setup, include=FALSE}
+# load libraries
+library(data.table)
+
+# define directories 
+dir3 <- "path/to/HCAI_Definitions"   # working directory for HCAI Definitions inputs
+dir4 <- "path/to/HCAI_Grouping"      # working directory for HCAI Grouping outputs
+```
+
+```{r Defining Groups, include=FALSE}
+## definitions below
+
+D2Dx1 <- c("dx1ext_dehydration", "dx1ext_urinary", "dx1ext_heat")
+
+D5Dx1 <- c("dx1ext_ihd", "dx1ext_cd", "dx1ext_hypo", "dx1ext_istroke", "dx1ext_pneu", "dx1ext_infect", "dx1ext_diab", "dx1ext_dehydration", "dx1ext_arf",  "dx1ext_heat")
+
+columns2keep <- c("date", "agyrserv", "sex", "eth", "race", "patzip", "patco", "serv_dt", "D2Dx1", "D5Dx1")
+```
+
+```{r Grouping HCAI 2008, include=FALSE}
+# Load ED dataset 
+Grouped2008 <- fread(file.path(dir3, "ICD9_2008_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2008)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2008[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2008s <- Grouped2008[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2008s)
+
+# Clean up memory
+rm(Grouped2008) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2008s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2008s <- Grouped2008s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2008s, file = file.path(dir4, "ICD9_2008_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2008s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2009, include=FALSE}
+# Load ED dataset 
+Grouped2009 <- fread(file.path(dir3, "ICD9_2009_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2009)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2009[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2009s <- Grouped2009[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2009s)
+
+# Clean up memory
+rm(Grouped2009) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2009s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2009s <- Grouped2009s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2009s, file = file.path(dir4, "ICD9_2009_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2009s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2010, include=FALSE}
+# Load ED dataset 
+Grouped2010 <- fread(file.path(dir3, "ICD9_2010_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2010)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2010[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2010s <- Grouped2010[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2010s)
+
+# Clean up memory
+rm(Grouped2010) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2010s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2010s <- Grouped2010s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2010s, file = file.path(dir4, "ICD9_2010_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2010s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2011, include=FALSE}
+# Load ED dataset 
+Grouped2011 <- fread(file.path(dir3, "ICD9_2011_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2011)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2011[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2011s <- Grouped2011[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2011s)
+
+# Clean up memory
+rm(Grouped2011) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2011s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2011s <- Grouped2011s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2011s, file = file.path(dir4, "ICD9_2011_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2011s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2012, include=FALSE}
+# Load ED dataset 
+Grouped2012 <- fread(file.path(dir3, "ICD9_2012_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2012)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2012[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2012s <- Grouped2012[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2012s)
+
+# Clean up memory
+rm(Grouped2012) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2012s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2012s <- Grouped2012s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2012s, file = file.path(dir4, "ICD9_2012_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2012s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2013, include=FALSE}
+# Load ED dataset 
+Grouped2013 <- fread(file.path(dir3, "ICD9_2013_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2013)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2013[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2013s <- Grouped2013[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2013s)
+
+# Clean up memory
+rm(Grouped2013) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2013s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2013s <- Grouped2013s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2013s, file = file.path(dir4, "ICD9_2013_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2013s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2014, include=FALSE}
+# Load ED dataset 
+Grouped2014 <- fread(file.path(dir3, "ICD9_2014_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2014)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2014[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2014s <- Grouped2014[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2014s)
+
+# Clean up memory
+rm(Grouped2014) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2014s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2014s <- Grouped2014s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2014s, file = file.path(dir4, "ICD9_2014_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2014s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2015v1, include=FALSE}
+# Load ED dataset 
+Grouped2015v1 <- fread(file.path(dir3, "ICD9_2015v1_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2015v1)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2015v1[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2015v1s <- Grouped2015v1[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2015v1s)
+
+# Clean up memory
+rm(Grouped2015v1) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2015v1s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2015v1s <- Grouped2015v1s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2015v1s, file = file.path(dir4, "ICD9_2015v1_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2015v1s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2015v2, include=FALSE}
+# Load ED dataset 
+Grouped2015v2 <- fread(file.path(dir3, "ICD10_2015v2_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2015v2)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2015v2[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2015v2s <- Grouped2015v2[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2015v2s)
+
+# Clean up memory
+rm(Grouped2015v2) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2015v2s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2015v2s <- Grouped2015v2s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2015v2s, file = file.path(dir4, "ICD10_2015v2_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2015v2s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2016, include=FALSE}
+# Load ED dataset 
+Grouped2016 <- fread(file.path(dir3, "ICD10_2016_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2016)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2016[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2016s <- Grouped2016[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2016s)
+
+# Clean up memory
+rm(Grouped2016) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2016s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2016s <- Grouped2016s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2016s, file = file.path(dir4, "ICD10_2016_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2016s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2017, include=FALSE}
+# Load ED dataset 
+Grouped2017 <- fread(file.path(dir3, "ICD10_2017_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2017)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2017[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2017s <- Grouped2017[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2017s)
+
+# Clean up memory
+rm(Grouped2017) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2017s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2017s <- Grouped2017s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2017s, file = file.path(dir4, "ICD10_2017_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2017s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
+```{r Grouping HCAI 2018, include=FALSE}
+# Load ED dataset 
+Grouped2018 <- fread(file.path(dir3, "ICD10_2018_ED.csv")) 
+
+# Get total row count before filtering
+length14all <- nrow(Grouped2018)
+
+# Convert 'serv_dt' to date format in data.table
+Grouped2018[, date := as.POSIXct(strptime(serv_dt, format = "%m/%d/%Y", tz = "GMT"))]
+
+# Filter dataset to keep only months May to October
+Grouped2018s <- Grouped2018[month(date) %in% 5:10]
+
+# Get row count after filtering
+length14_OctApril <- nrow(Grouped2018s)
+
+# Clean up memory
+rm(Grouped2018) # Remove large original dataset to free memory
+gc()            # Garbage collection to free up space
+
+# Define column groups 
+condition_groups <- list(D2Dx1 = D2Dx1,
+                         D5Dx1 = D5Dx1)
+
+# Create new columns
+for (new_col in names(condition_groups)) {
+  Grouped2018s[, (new_col) := as.integer(rowSums(.SD == 1) > 0), .SDcols = condition_groups[[new_col]]]
+}
+
+# Keep only the necessary columns
+Grouped2018s <- Grouped2018s[, ..columns2keep]
+
+# Save processed data
+fwrite(Grouped2018s, file = file.path(dir4, "ICD10_2018_ED_Grouped.csv")) 
+
+# Clean up memory
+rm(Grouped2018s) # Remove dataset to free memory
+gc()             # Garbage collection to free up space
+```
+
