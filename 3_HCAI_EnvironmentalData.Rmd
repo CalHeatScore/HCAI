@@ -1,0 +1,313 @@
+---
+title: "3_HCAI_EnvironmentalData"
+output: html_document
+author: Marinelle Villanueva
+date: '2025-08-31'
+Purpose: This code prepare the grouped HCAI data for modeling. Data is aggregrated by ZIP code at the daily level. ED visits in the ED file are treat and release only and do not include the ED visits that get hospitalized (e.g. this code does not include PDD records). Aggregated data are combined with ZIP code-level data for daily maximum apparent temperature, climate zones, and population count. 
+---
+
+```{r setup, include=FALSE}
+# load libraries
+library(data.table)
+library(dplyr)
+library(lubridate)
+library(openair)
+library(sf)
+
+# define directories 
+dir4 <- "path/to/HCAI_Grouping"           # working directory for HCAI Grouping inputs
+dir5 <- "path/to/environmental/data"      # working directory for environmental data inputs
+dir6 <- "path/to/model"                   # working directory for model-ready outputs
+```
+
+```{r Aggregate Daily ED Visits by ZIP code, include=FALSE}
+## 2018 ED Data
+ED2018ALL <- fread(file.path(dir4, "ICD10_2018_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2018ALL$date <- as.POSIXct(strptime(ED2018ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2018_MayOct <- selectByDate(ED2018ALL, month = 5:10) # filter between warm season (May through October)
+ED2018_MayOct$month <- format(ED2018_MayOct$date, "%m")
+ED2018_MayOct$zip <- as.character(ED2018_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2018_MayOct <- ED2018_MayOct %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2018ALL, ED2018_MayOct)
+
+
+## 2017 ER Data
+ED2017ALL <- fread(file.path(dir4, "ICD10_2017_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2017ALL$date <- as.POSIXct(strptime(ED2017ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2017_MayOct <- selectByDate(ED2017ALL, month = 5:10) # filter between warm season (May through October)
+ED2017_MayOct$month <- format(ED2017_MayOct$date, "%m")
+ED2017_MayOct$zip <- as.character(ED2017_MayOct$patzip)
+
+# Aggregate ER visits by ZIP code & Day 
+Agg_ED2017_MayOct <- ED2017_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2017ALL, ED2017_MayOct)
+
+
+## 2016 ED Data
+ED2016ALL <- fread(file.path(dir4, "ICD10_2016_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2016ALL$date <- as.POSIXct(strptime(ED2016ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2016_MayOct <- selectByDate(ED2016ALL, month = 5:10) # filter between warm season (May through October)
+ED2016_MayOct$month <- format(ED2016_MayOct$date, "%m")
+ED2016_MayOct$zip <- as.character(ED2016_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2016_MayOct <- ED2016_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2016ALL, ED2016_MayOct)
+
+
+## 2015v2 ED Data
+ED2015v2ALL <- fread(file.path(dir4, "ICD10_2015v2_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2015v2ALL$date <- as.POSIXct(strptime(ED2015v2ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2015v2_MayOct <- selectByDate(ED2015v2ALL, month = 5:10)
+ED2015v2_MayOct$month <- format(ED2015v2_MayOct$date, "%m")
+ED2015v2_MayOct$zip <- as.character(ED2015v2_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2015v2_MayOct <- ED2015v2_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2015v2ALL, ED2015v2_MayOct)
+
+
+## 2015v1 ED Data
+ED2015v1ALL <- fread(file.path(dir4, "ICD9_2015v1_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2015v1ALL$date <- as.POSIXct(strptime(ED2015v1ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2015v1_MayOct <- selectByDate(ED2015v1ALL, month = 5:10)
+ED2015v1_MayOct$month <- format(ED2015v1_MayOct$date, "%m")
+ED2015v1_MayOct$zip <- as.character(ED2015v1_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2015v1_MayOct <- ED2015v1_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2015v1ALL, ED2015v1_MayOct)
+
+
+## 2014 ED Data
+ED2014ALL <- fread(file.path(dir4, "ICD9_2014_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2014ALL$date <- as.POSIXct(strptime(ED2014ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2014_MayOct <- selectByDate(ED2014ALL, month = 5:10)
+ED2014_MayOct$month <- format(ED2014_MayOct$date, "%m")
+ED2014_MayOct$zip <- as.character(ED2014_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2014_MayOct <- ED2014_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2014ALL, ED2014_MayOct)
+
+
+## 2013 ED Data
+ED2013ALL <- fread(file.path(dir4, "ICD9_2013_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2013ALL$date <- as.POSIXct(strptime(ED2013ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2013_MayOct <- selectByDate(ED2013ALL, month = 5:10)
+ED2013_MayOct$month <- format(ED2013_MayOct$date, "%m")
+ED2013_MayOct$zip <- as.character(ED2013_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2013_MayOct <- ED2013_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2013ALL, ED2013_MayOct)
+
+
+## 2012 ED Data
+ED2012ALL <- fread(file.path(dir4, "ICD9_2012_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2012ALL$date <- as.POSIXct(strptime(ED2012ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2012_MayOct <- selectByDate(ED2012ALL, month = 5:10)
+ED2012_MayOct$month <- format(ED2012_MayOct$date, "%m")
+ED2012_MayOct$zip <- as.character(ED2012_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2012_MayOct <- ED2012_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2012ALL, ED2012_MayOct)
+
+
+## 2011 ED Data
+ED2011ALL <- fread(file.path(dir4, "ICD9_2011_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2011ALL$date <- as.POSIXct(strptime(ED2011ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2011_MayOct <- selectByDate(ED2011ALL, month = 5:10)
+ED2011_MayOct$month <- format(ED2011_MayOct$date, "%m")
+ED2011_MayOct$zip <- as.character(ED2011_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2011_MayOct <- ED2011_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2011ALL, ED2011_MayOct)
+
+
+## 2010 ED Data
+ED2010ALL <- fread(file.path(dir4, "ICD9_2010_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2010ALL$date <- as.POSIXct(strptime(ED2010ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2010_MayOct <- selectByDate(ED2010ALL, month = 5:10)
+ED2010_MayOct$month <- format(ED2010_MayOct$date, "%m")
+ED2010_MayOct$zip <- as.character(ED2010_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2010_MayOct <- ED2010_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2010ALL, ED2010_MayOct)
+
+
+## 2009 ED Data
+ED2009ALL <- fread(file.path(dir4, "ICD9_2009_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2009ALL$date <- as.POSIXct(strptime(ED2009ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2009_MayOct <- selectByDate(ED2009ALL, month = 5:10)
+ED2009_MayOct$month <- format(ED2009_MayOct$date, "%m")
+ED2009_MayOct$zip <- as.character(ED2009_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2009_MayOct <- ED2009_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2009ALL, ED2009_MayOct)
+
+
+## 2008 ED Data
+ED2008ALL <- fread(file.path(dir4, "ICD9_2008_ED_Grouped.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+ED2008ALL$date <- as.POSIXct(strptime(ED2008ALL$serv_dt, format = "%m/%d/%Y", tz = "GMT"))
+ED2008_MayOct <- selectByDate(ED2008ALL, month = 5:10)
+ED2008_MayOct$month <- format(ED2008_MayOct$date, "%m")
+ED2008_MayOct$zip <- as.character(ED2008_MayOct$patzip)
+
+# Aggregate ED visits by ZIP code & Day 
+Agg_ED2008_MayOct <- ED2008_MayOct %>%
+  mutate(zip = as.character(patzip)) %>%
+  group_by(date, zip) %>%
+  summarise(across(starts_with("D"), sum, .names = "{.col}"), .groups = "drop")
+rm(ED2008ALL, ED2008_MayOct)
+
+
+# Bind Years
+Agg_ED0818_MayOct <- rbind(Agg_ED2018_MayOct, 
+                           Agg_ED2017_MayOct, 
+                           Agg_ED2016_MayOct, 
+                           Agg_ED2015v1_MayOct, 
+                           Agg_ED2015v2_MayOct, 
+                           Agg_ED2014_MayOct, 
+                           Agg_ED2013_MayOct, 
+                           Agg_ED2012_MayOct,
+                           Agg_ED2011_MayOct, 
+                           Agg_ED2010_MayOct, 
+                           Agg_ED2009_MayOct, 
+                           Agg_ED2008_MayOct)
+# Clean up memory
+rm(Agg_ED2018_MayOct,
+   Agg_ED2017_MayOct, 
+   Agg_ED2016_MayOct, 
+   Agg_ED2015v1_MayOct,
+   Agg_ED2015v2_MayOct, 
+   Agg_ED2014_MayOct,
+   Agg_ED2013_MayOct,
+   Agg_ED2012_MayOct, 
+   Agg_ED2011_MayOct, 
+   Agg_ED2010_MayOct, 
+   Agg_ED2009_MayOct, 
+   Agg_ED2008_MayOct)
+
+# Add Zeros to missing zips/day combinations
+unique_zip <- unique(Agg_ED0818_MayOct$zip)
+unique_date <- unique(Agg_ED0818_MayOct$date)
+comb08_18 <- expand.grid(zip = unique_zip, date = unique_date)
+ZIP_Agg_ED0818_MayOct_ALL <- merge(comb08_18, Agg_ED0818_MayOct, by = c("zip", "date"), all = TRUE)
+
+ZIP_Agg_ED0818_MayOct_ALL[] <- lapply(ZIP_Agg_ED0818_MayOct_ALL, function(x) {
+  if (is.factor(x)) factor(replace(as.character(x), is.na(x), "0")) else x
+})
+```
+
+```{r Linking ED Data with Temperature, Climate Zone, and Population Data}
+
+# Load daily maximum heat index data from GridMET assigned to ZIP codes by the population-weighted centroid
+HI <- fread(file.path(dir5, "MaxHI_ZIP_2008_2018.csv"), stringsAsFactors=FALSE, header=T) %>%
+  as.data.frame()
+HI$date <- as.POSIXct(strptime(HI$date, format = "%Y-%m-%d", tz = "GMT"))
+HI <- HI[,c(2,3,6)]
+HI <- HI %>%
+  mutate(zip = as.character(ZIP_CODE)) %>%
+  select(-ZIP_CODE)
+
+
+# Load climate zone data assigned to ZIP codes by the population-weighted centroid
+CZ <- fread(file.path(dir5, "ZIP_30Zones.xls"), col_names=TRUE) %>% as.data.frame()
+CZ <- CZ %>%
+  mutate(zip = as.character(ZIP_CODE),
+         FinalClust = Clust30) %>%
+  select(zip, Clust30)
+
+# Merge heat index data with climate zones
+HI_CZ <- left_join(
+  HI, 
+  CZ,
+  by = "zip",
+  relationship = "many-to-one")
+HI_CZ <- HI_CZ[!is.na(HeatDays_CZ$date), ]
+
+# Join health data with environmental data
+ZIP_Agg_ED0818_MayOct_ALL$zip <- as.character(ZIP_Agg_ED0818_MayOct_ALL$zip)
+
+ZIP_Agg_ED0818_MayOct_ALL <- left_join(
+  ZIP_Agg_ED0818_MayOct_ALL, 
+  HI_CZ, 
+  by = c("zip", "date"), 
+  relationship = "one-to-one"
+)
+
+ZIP_Agg_ED0818_MayOct_ALL <- ZIP_Agg_ED0818_MayOct_ALL[!is.na(ZIP_Agg_ED0818_MayOct_ALL$Max_HI_Value), ]
+
+# load population data from population-weighted centroids 
+pop <- read_sf(file.path(dir5, "CA_ZIP_PopWeightedCentroids.shp")) %>% as.data.frame()
+pop <- pop %>%
+  mutate(zip = as.character(ZIP_CODE)) %>%
+  select(zip, pop)
+
+# Join health and environmental data with population data
+ZIP_Agg_ED0818_MayOct_ALL <- left_join(
+  ZIP_Agg_ED0818_MayOct_ALL, 
+  pop, 
+  by = c("zip"), 
+  relationship = "many-to-one"
+)
+
+ZIP_Agg_ED0818_MayOct_ALL <- ZIP_Agg_ED0818_MayOct_ALL %>%
+  select(-yr)
+
+# Save processed data
+fwrite(ZIP_Agg_ED0818_MayOct_ALL, file = file.path(dir6, "ZIP_TotalEDDaily0818pois.csv")) 
+```
+
+
